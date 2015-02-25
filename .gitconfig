@@ -1,0 +1,22 @@
+[user]
+		 
+[core]
+	    editor = vim # Use your preferred editor here
+	     
+	     ### OPTIONAL ALIASES ###
+	     ## Add these only if you'd like
+	     #[alias]
+	     
+[alias]
+	     #    # push the current branch to origin
+	     #    pushup = !git push origin $(git rev-parse --abbrev-ref HEAD)
+	     co = checkout
+	     ## shows each changed file on a single line, ignoring unchanged or ignored files
+	     #    st = status -s -uno
+	     ## shows each changed file with each log commit
+	     #  lg = log --stat
+	     ## automatically adds any modified file as part of the commit
+	     #   ci = commit -a
+	     br = branch
+	     #                                            # same as "git push origin <branchName>
+	     #                                                pub = "!f() { git push -u ${1:-origin} `git symbolic-ref HEAD`; }; f"

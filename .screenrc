@@ -1,2 +1,6 @@
-escape ^Bb
+caption always
+caption string "%{= bW}%3n %{y}%t %{-}%= %{m}%H%?%{-} -- %{c}%l%?%{-} -- %D %M %d %{y}%c"
+
+defscrollback 10000
+
 

@@ -1,9 +1,21 @@
 set sm
 
-set ai
+set ai				" autoindent
+
+set ignorecase
 
 set nocompatible              " be iMproved, required
 filetype off                  " required
+
+
+au WinLeave * set nocursorline nocursorcolumn
+" au WinEnter * set cursorline cursorcolumn
+set cursorline " cursorcolumn
+
+" Set cursorline colors
+highlight CursorLine ctermbg=235
+" " Set color of number column on cursorline
+highlight CursorLineNR ctermbg=235 ctermfg=white
 
 " set the runtime path to include Vundle and initialize
 set rtp+=~/.vim/bundle/Vundle.vim

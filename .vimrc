@@ -4,12 +4,16 @@ set ai				" autoindent
 
 set ignorecase
 
+set number
+
+set scrolloff=5
+
 set nocompatible              " be iMproved, required
 filetype off                  " required
 
 
-au WinLeave * set nocursorline nocursorcolumn
-" au WinEnter * set cursorline cursorcolumn
+au WinLeave * set nocursorline "nocursorcolumn
+au WinEnter * set cursorline "cursorcolumn
 set cursorline " cursorcolumn
 
 " Set cursorline colors

@@ -76,9 +76,9 @@ let java_highlight_functions="style"
 
 
 "set smartindent
-"set tabstop=4
-"set shiftwidth=4
-"set expandtab
+set tabstop=4
+set shiftwidth=4
+set expandtab
 
 set ls=2 " Always show status line
 if has('statusline')

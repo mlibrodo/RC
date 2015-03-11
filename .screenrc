@@ -62,7 +62,8 @@
  #                              the rest of the caption string is justified
  #                              against the right edge of the screen.
  #                              NOTE: doesn't appear to truncate previous text.
- caption always           "%?%F%{= Kk}%:%{=u kR}%?  %h %-024=%{+b} %C%a %D %d %M %Y%{= db}"
+ #caption always           "%?%F%{= Kk}%:%{=u kR}%?  %h %-024=%{+b} %C%a %D %d %M %Y%{= db}"
+ caption always           "%?%F%{= Kk}%:%{=u kR}%?  %t %-024=%{+b} %C%a %D %d %M %Y%{= db}"
  
  
  # use the hardstatus line for the window list

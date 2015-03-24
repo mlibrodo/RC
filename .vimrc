@@ -11,6 +11,9 @@ set scrolloff=5
 set nocompatible              " be iMproved, required
 filetype off                  " required
 
+" http://superuser.com/questions/246641/vim-completion-always-suppress-the-newline-after-i-select-a-suggestion-with-th
+" dont skip line when using Ctrl-N
+noremap pumvisible() ? "\" : " "
 
 au WinLeave * set nocursorline "nocursorcolumn
 au WinEnter * set cursorline "cursorcolumn

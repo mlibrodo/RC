@@ -167,7 +167,7 @@ command! PrettyXML call DoPrettyXML()
 
 "CTRL=P configurations
 let g:ctrlp_custom_ignore = {
-  \ 'dir':  '\v[\/]\.(git|hg|svn)$',
+  \ 'dir':  '\v[\/]\.(git|hg|svn)$|target',
   \ 'file': '\v\.(exe|so|dll|class)$',
   \ 'link': 'some_bad_symbolic_links',
   \ }

@@ -15,7 +15,7 @@ filetype off                  " required
 " dont skip line when using Ctrl-N
 noremap pumvisible() ? "\" : " "
 
-nnoremap gr :grep -r <cword> *<CR>
+nnoremap gr :grep -F -i -r <cword> *<CR>
 nnoremap gR :grep -r '\b<cword>\b' *<CR>
 
 au WinLeave * set nocursorline "nocursorcolumn

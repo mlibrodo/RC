@@ -16,6 +16,7 @@ filetype off                  " required
 noremap pumvisible() ? "\" : " "
 
 nnoremap gr :grep -F -i -r <cword> *<CR>
+nnoremap GR :grep -F -r <cword> *<CR>
 nnoremap gR :grep -r '\b<cword>\b' *<CR>
 
 au WinLeave * set nocursorline "nocursorcolumn

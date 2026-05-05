@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Called from a Claude Code UserPromptSubmit hook.
+# Renames the tmux window to the git repo name (or directory name) only if
+# the current name looks like a shell default (bare IP, bash, zsh, sh).
+# Skips silently if not in tmux or window already has a meaningful name.
+
+[ -n "$TMUX" ] || exit 0
+
+CURRENT=$(tmux display-message -p '#W')
+
+if ! echo "$CURRENT" | grep -qE '^[0-9]+(\.[0-9]+)+$|^bash$|^zsh$|^sh$'; then
+    exit 0
+fi
+
+NAME=$(git rev-parse --show-toplevel 2>/dev/null)
+if [ -n "$NAME" ]; then
+    NAME=$(basename "$NAME")
+else
+    NAME=$(basename "$PWD")
+fi
+
+~/.local/bin/tmux-rename-window --force "$NAME"

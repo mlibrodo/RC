@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Rename the current tmux window, respecting manual renames.
+# Usage: tmux-rename-window <new-name>
+#        tmux-rename-window --force <new-name>
+#
+# Tracks the last Claude-set name in the tmux window variable @claude_window_name.
+# Without --force: if the current name differs from @claude_window_name, the user
+# manually renamed the window and this call is skipped.
+# With --force: always renames regardless.
+
+set -euo pipefail
+
+if [ -z "${TMUX:-}" ]; then
+    echo "Not in a tmux session" >&2
+    exit 1
+fi
+
+FORCE=0
+if [ "${1:-}" = "--force" ]; then
+    FORCE=1
+    shift
+fi
+
+NEW_NAME="${1:-}"
+if [ -z "$NEW_NAME" ]; then
+    echo "Usage: tmux-rename-window [--force] <name>" >&2
+    exit 1
+fi
+
+CURRENT_NAME=$(tmux display-message -p '#W')
+CLAUDE_SET_NAME=$(tmux show-options -wv @claude_window_name 2>/dev/null || true)
+
+if [ "$FORCE" -eq 0 ] && [ -n "$CLAUDE_SET_NAME" ] && [ "$CURRENT_NAME" != "$CLAUDE_SET_NAME" ]; then
+    exit 0
+fi
+
+tmux rename-window "$NEW_NAME"
+tmux set-option -w @claude_window_name "$NEW_NAME"

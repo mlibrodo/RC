@@ -173,3 +173,8 @@ let g:ctrlp_custom_ignore = {
   \ 'file': '\v\.(exe|so|dll|class)$',
   \ 'link': 'some_bad_symbolic_links',
   \ }
+
+" Machine-specific overrides (not tracked in git)
+if filereadable(expand("~/.vimrc.local"))
+    source ~/.vimrc.local
+endif

@@ -88,6 +88,10 @@ set tabstop=4
 set shiftwidth=4
 set expandtab
 
+" Show whitespace characters
+set list
+set listchars=space:·,tab:→\ ,trail:•,eol:¬
+
 set ls=2 " Always show status line
 if has('statusline')
    " Status line detail:

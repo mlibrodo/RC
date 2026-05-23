@@ -178,6 +178,20 @@ let g:ctrlp_custom_ignore = {
   \ 'link': 'some_bad_symbolic_links',
   \ }
 
+" Auto-reload files changed outside Vim
+set autoread
+" Trigger checktime on focus/buffer/idle events so autoread actually fires
+" (skip while in command-line mode to avoid clobbering it)
+au FocusGained,BufEnter,CursorHold,CursorHoldI * if mode() !~ '\c\v^c' | checktime | endif
+
+" Enable terminal focus reporting so FocusGained/FocusLost fire in terminal Vim
+" (requires `set -g focus-events on` in ~/.tmux.conf when running under tmux)
+if !has('gui_running')
+  set t_ti+=[?1004h
+  set t_te+=[?1004l
+endif
+
+
 " Machine-specific overrides (not tracked in git)
 if filereadable(expand("~/.vimrc.local"))
     source ~/.vimrc.local

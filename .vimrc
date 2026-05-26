@@ -61,6 +61,8 @@ Plugin 'scrooloose/nerdtree.git'
 
 Plugin 'kien/ctrlp.vim'
 
+Plugin 'fatih/vim-go'
+
 call vundle#end()            " required
 filetype plugin indent on    " required
 " To ignore plugin indent changes, instead use:

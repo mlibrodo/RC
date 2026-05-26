@@ -191,6 +191,85 @@ if !has('gui_running')
   set t_te+=[?1004l
 endif
 
+  " ===========================================================
+  " Cheatsheet — quick reminders. Shown on startup (no file)
+  " or any time via <leader>? (leader is \ by default).
+  " ===========================================================
+
+  function! ShowCheatsheet()
+    botright new
+    setlocal buftype=nofile bufhidden=wipe noswapfile nowrap
+    let lines = [
+          \ '=============================================================',
+          \ '                    VIM QUICK REFERENCE',
+          \ '=============================================================',
+          \ '',
+          \ '  FILES & BUFFERS',
+          \ '    :e <file>           open file',
+          \ '    :w                  save  (:wq or :x  save+quit)',
+          \ '    :q   :qa   :q!      quit / quit all / force quit',
+          \ '    Ctrl-g              show filename & line/col info',
+          \ '    :ls                 list open buffers',
+          \ '    :b <num>            switch to buffer by number',
+          \ '',
+          \ '  SPLITS',
+          \ '    :sp   Ctrl-w s      horizontal split',
+          \ '    :vsp  Ctrl-w v      vertical split',
+          \ '    Ctrl-w h/j/k/l      move between splits',
+          \ '    Ctrl-w c   :close   close current split',
+          \ '    Ctrl-w o            keep only current split',
+          \ '    Ctrl-w =            equalize split sizes',
+          \ '',
+          \ '  NERDTREE',
+          \ '    Ctrl-t              toggle NerdTree',
+          \ '    Ctrl-n              open NerdTree',
+          \ '    Ctrl-f              find current file in tree',
+          \ '',
+          \ '  SEARCH / REPLACE',
+          \ '    /pattern            search forward  (n next, N prev)',
+          \ '    ?pattern            search backward',
+          \ '    *                   search word under cursor',
+          \ '    :%s/old/new/g       replace all in file',
+          \ '    :%s/old/new/gc      replace all with confirm',
+          \ '    :s/old/new/g        replace all in current line',
+          \ '',
+          \ '  COPY / PASTE  (yank = copy in vim-speak)',
+          \ '    yy / yw / y$        yank line / word / to end of line',
+          \ '    p / P               paste after / before cursor',
+          \ '    "+y    "+p          system clipboard yank / paste',
+          \ '    v / V / Ctrl-v      visual char / line / block',
+          \ '                        then y to yank, d to cut',
+          \ '',
+          \ '  DISPLAY TOGGLES',
+          \ '    :set list!          toggle whitespace chars (·, →, ¬)',
+          \ '    <leader>l           same, as a shortcut',
+          \ '    :set wrap!          toggle line wrap',
+          \ '    :set number!        toggle line numbers',
+          \ '',
+          \ '  THIS CHEATSHEET',
+          \ '    <leader>?           show this any time',
+          \ '    :h <topic>          full help on any topic',
+          \ '',
+          \ '=============================================================',
+          \ '  Press  q  to close this window.',
+          \ '=============================================================',
+          \ ]
+    call setline(1, lines)
+    setlocal nomodifiable
+    setlocal filetype=cheatsheet
+    nnoremap <buffer> q :close<CR>
+    nnoremap <buffer> <Esc> :close<CR>
+  endfunction
+
+" Show on Vim startup when no file was opened
+autocmd VimEnter * if argc() == 0 | call ShowCheatsheet() | endif
+
+" Show on demand
+nnoremap <leader>? :call ShowCheatsheet()<CR>
+
+" Toggle whitespace visualization
+nnoremap <leader>l :set list!<CR>
+
 
 " Machine-specific overrides (not tracked in git)
 if filereadable(expand("~/.vimrc.local"))

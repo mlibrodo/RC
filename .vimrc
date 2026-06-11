@@ -63,6 +63,12 @@ Plugin 'kien/ctrlp.vim'
 
 Plugin 'fatih/vim-go'
 
+" Rust: official filetype plugin (syntax, :RustFmt, format-on-save)
+Plugin 'rust-lang/rust.vim'
+
+" LSP client (native Vim9) — powers rust-analyzer (and other servers)
+Plugin 'yegappan/lsp'
+
 call vundle#end()            " required
 filetype plugin indent on    " required
 " To ignore plugin indent changes, instead use:
@@ -249,6 +255,18 @@ endif
           \ '    Ctrl-n              open NerdTree',
           \ '    Ctrl-f              find current file in tree',
           \ '',
+          \ '  RUST / LSP  (in .rs files; via rust-analyzer)',
+          \ '    gd                  go to definition',
+          \ '    K                   hover: type / docs',
+          \ '    <leader>gi          go to implementation',
+          \ '    <leader>gr          show references',
+          \ '    <leader>rn          rename symbol',
+          \ '    <leader>ca          code action / quick fix',
+          \ '    [d   ]d             previous / next diagnostic',
+          \ '    <leader>e           show diagnostic on current line',
+          \ '    :RustFmt            format file (also auto on save)',
+          \ '    :LspServer status   show LSP server status',
+          \ '',
           \ '  SEARCH / REPLACE',
           \ '    /pattern            search forward  (n next, N prev)',
           \ '    ?pattern            search backward',
@@ -307,6 +325,39 @@ nnoremap <leader>? :call ShowCheatsheet()<CR>
 " Toggle whitespace visualization
 nnoremap <leader>l :set list!<CR>
 
+
+" ===========================================================
+" Rust + LSP
+"   rust.vim   -> syntax / rustfmt
+"   yegappan/lsp -> LSP client (drives rust-analyzer from $PATH)
+" Requires Vim 9.0+ and rust-analyzer installed (rustup component add
+" rust-analyzer, or it ships with the rustup toolchain).
+" ===========================================================
+
+" Format Rust on save with rustfmt
+let g:rustfmt_autosave = 1
+
+if (v:version >= 900) && executable('rust-analyzer')
+  let s:lspServers = [#{
+        \   name: 'rustanalyzer',
+        \   filetype: ['rust'],
+        \   path: exepath('rust-analyzer'),
+        \   args: [],
+        \   syncInit: v:true,
+        \ }]
+  autocmd User LspSetup call LspAddServer(s:lspServers)
+
+  " LSP navigation (active in LSP-managed buffers; gr/gR left as grep maps)
+  nnoremap <silent> gd        :LspGotoDefinition<CR>
+  nnoremap <silent> K         :LspHover<CR>
+  nnoremap <silent> <leader>gi :LspGotoImpl<CR>
+  nnoremap <silent> <leader>gr :LspShowReferences<CR>
+  nnoremap <silent> <leader>rn :LspRename<CR>
+  nnoremap <silent> <leader>ca :LspCodeAction<CR>
+  nnoremap <silent> [d        :LspDiagPrev<CR>
+  nnoremap <silent> ]d        :LspDiagNext<CR>
+  nnoremap <silent> <leader>e :LspDiagCurrent<CR>
+endif
 
 " Machine-specific overrides (not tracked in git)
 if filereadable(expand("~/.vimrc.local"))

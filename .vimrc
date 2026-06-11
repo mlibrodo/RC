@@ -357,6 +357,23 @@ if (v:version >= 900) && executable('rust-analyzer')
   nnoremap <silent> [d        :LspDiagPrev<CR>
   nnoremap <silent> ]d        :LspDiagNext<CR>
   nnoremap <silent> <leader>e :LspDiagCurrent<CR>
+
+  " On opening a .rs file, flash a transient reminder of the LSP bindings.
+  " Auto-closes after a few seconds; click or move to dismiss.
+  " Disable with:  let g:rust_lsp_hints = 0   (e.g. in ~/.vimrc.local)
+  let g:rust_lsp_hints = get(g:, 'rust_lsp_hints', 1)
+  function! s:RustLspHints() abort
+    if !g:rust_lsp_hints || !exists('*popup_notification') | return | endif
+    call popup_notification([
+          \ ' Rust LSP  (\? for full cheatsheet) ',
+          \ ' gd definition      K hover',
+          \ ' <ldr>gi impl        <ldr>gr references',
+          \ ' <ldr>rn rename      <ldr>ca code action',
+          \ ' [d ]d diagnostics   <ldr>e diag here',
+          \ ' :RustFmt format     :LspServer status',
+          \ ], #{ time: 6000, highlight: 'Pmenu', border: [], padding: [0,1,0,1] })
+  endfunction
+  autocmd FileType rust call s:RustLspHints()
 endif
 
 " Machine-specific overrides (not tracked in git)

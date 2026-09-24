@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Set or clear the @needs_answer flag on the tmux window running this Claude
+# Code session, so the status bar can render a "!!!" attention marker.
+#
+# Driven by Claude Code hooks:
+#   Stop / Notification  -> set   (Claude is waiting on you)
+#   UserPromptSubmit     -> clear (you answered)
+#
+# Targets the window by $TMUX_PANE (exported by tmux into every pane), so it
+# marks the correct window even when it isn't the active one. No-ops outside tmux.
+
+[ -n "$TMUX_PANE" ] || exit 0
+
+case "$1" in
+    set)   tmux set-option -w -t "$TMUX_PANE" @needs_answer 1 ;;
+    clear) tmux set-option -w -t "$TMUX_PANE" @needs_answer 0 ;;
+esac
+
+exit 0

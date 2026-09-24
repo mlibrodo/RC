@@ -64,9 +64,9 @@ if [ ! -d "$VUNDLE_DIR/.git" ]; then
 fi
 vim -E -s -u "$HOME/.vimrc" +PluginInstall +qall </dev/null || true
 
-# --- Claude Code tmux-auto-rename hook ---
-echo "Installing Claude Code tmux-auto-rename hook"
-bash "$REPO_DIR/tmux-claude-rename/install.sh"
+# --- Claude Code <-> tmux integration (hooks, /my-session skill) ---
+echo "Installing Claude Code tmux integration"
+bash "$REPO_DIR/tmux-claude/install.sh"
 
 echo
 echo "Done."

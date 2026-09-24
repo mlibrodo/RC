@@ -18,7 +18,7 @@ tweaks never end up in the public repo.
 | `.tmux.conf`           | `~/.tmux.conf`          | `Ctrl-a` prefix, screen-compatible bindings, mouse, etc.|
 | `.screenrc`            | `~/.screenrc`           | GNU screen config                                       |
 | `.gitconfig`           | `~/.gitconfig`          | Aliases (`co`, `br`, `ci`, `st`, `lg`, `pub`, `pushup`) |
-| `tmux-claude-rename/`  | `~/.local/bin/tmux-*`   | Auto-renames tmux windows from a Claude Code hook       |
+| `tmux-claude/`         | `~/.local/bin/tmux-*`, `~/.claude/skills/` | Claude Code hooks, `/my-session` skill, tmux integration |
 
 The Vim plugins declared in `.vimrc` (vim-scala, NERDTree, ctrlp.vim) are
 fetched into `~/.vim/bundle/` by Vundle. That directory is gitignored.
@@ -28,7 +28,7 @@ fetched into `~/.vim/bundle/` by Vundle. That directory is gitignored.
 - `git`
 - `vim`
 - `tmux`
-- `jq` (used by the tmux-rename installer to patch `~/.claude/settings.json`)
+- `jq` (used by the tmux-claude installer to patch `~/.claude/settings.json`)
 
 Install:
 
@@ -46,7 +46,7 @@ Paste this into Claude Code:
 
 > Clone `https://github.com/mlibrodo/RC` to `~/RC` and run `./install.sh`.
 > It symlinks the dotfiles into my home directory, installs Vundle plus the
-> Vim plugins, and sets up the Claude Code tmux-auto-rename hook. Back up
+> Vim plugins, and sets up the Claude Code tmux integration (hooks + /my-session skill). Back up
 > anything it replaces.
 
 Claude will handle prereq checks, backups, and the post-install steps
@@ -93,15 +93,17 @@ After editing it, verify:
 git config --get user.email   # should print what you set
 ```
 
-## Claude Code tmux hook
+## Claude Code tmux integration
 
-The `tmux-claude-rename/` subdir contains a hook that auto-renames the
-current tmux window to the active git repo (or directory) name on your
-first message in a Claude Code session. See
-[`tmux-claude-rename/README.md`](tmux-claude-rename/README.md) for details.
-`install.sh` runs it for you; it copies two scripts to `~/.local/bin/` and
-adds a `UserPromptSubmit` hook to `~/.claude/settings.json`. Manual renames
-are respected — Claude never overrides a window name you set yourself.
+Everything Claude-specific lives in `tmux-claude/`: the window auto-rename
+hook, the `!!!` "needs an answer" marker, the `/my-session` skill, and the
+tmux bindings that show session summaries. `install.sh` runs
+`tmux-claude/install.sh`, which symlinks the scripts into `~/.local/bin/` and
+the skill into `~/.claude/skills/`, adds the hooks to
+`~/.claude/settings.json`, and makes `~/.tmux.conf.local` source
+`tmux-claude/tmux-claude.conf`. See
+[`tmux-claude/README.md`](tmux-claude/README.md), which includes a
+fresh-laptop checklist.
 
 ## Uninstall
 
@@ -112,10 +114,5 @@ rm ~/.bashrc ~/.vimrc ~/.vim ~/.tmux.conf ~/.screenrc ~/.gitconfig
 # Restore originals (most-recent backup)
 cp -R ~/.dotfiles-backup-*/. ~/
 
-# Remove the tmux-rename hook from Claude Code settings
-jq 'del(.hooks.UserPromptSubmit)' ~/.claude/settings.json \
-    > ~/.claude/settings.json.tmp && mv ~/.claude/settings.json{.tmp,}
-
-# Remove the helper scripts
-rm -f ~/.local/bin/tmux-rename-window ~/.local/bin/tmux-auto-rename
+# Remove the Claude Code integration: see tmux-claude/README.md#uninstall
 ```

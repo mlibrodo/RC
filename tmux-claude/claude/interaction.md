@@ -23,19 +23,19 @@ context compaction, re-read it instead of rebuilding the list from memory.
 **Format** (markdown, as it prints in the terminal):
 
 ```
-**Checklist** (2026-09-30, 10:00 PT)
+**Checklist** (2026-01-15, 10:00 PT)
 **Now:** <the one thing in progress right now>
 
-**<Phase heading>**
-- [ ] **You:** approve and merge PR #5 (deploy workflow): https://github.com/org/repo/pull/5
-- [ ] **Me:** verify the new account on a test ticket
-- [ ] **Steve (IT):** add the service account to both channels (ITHELP-5628)
-- [x] **Me:** record the Reporter decision
+**Before release**
+- [ ] **You:** approve and merge PR #12 (config loader): https://github.com/example/app/pull/12
+- [ ] **Me:** re-run the integration tests against the new config
+- [ ] **Alex (infra):** grant the deploy key write access (#34)
+- [x] **Me:** write up the retry-policy decision
 
 **Done this session**
-- [x] v18 → v26 saved and tested; PRs #2 and #4 merged
+- [x] v3 → v5 of the parser tested; PRs #9 and #10 merged
 
-**Blocking:** Steve (ITHELP-5628) and your approval on PR #5.
+**Blocking:** Alex (#34) and your approval on PR #12.
 ```
 
 Rules:
@@ -45,7 +45,7 @@ Rules:
 - **Tick items off in place** (`[ ]` → `[x]`) as soon as they're done. Don't delete them.
   "Done this session" is for finished work that was never a planned item.
 - Add new items the moment they come up: follow-ups, things waiting on other people, deferred ideas.
-- Include ticket keys, PR numbers, and full raw URLs (never markdown link syntax).
+- Include issue/ticket keys, PR numbers, and full raw URLs (never markdown link syntax).
 - A table is fine for a test matrix or anything with several columns (#, case, who, status).
 - End with a one-line **Blocking:** summary when something is waiting on someone. Omit it when nothing is.
 - Keep items short, one line each.

@@ -39,11 +39,11 @@ scratchpad path or the transcript filename. `mkdir -p ~/.claude/session-checklis
 
 The command itself, as recorded in the transcript, is the marker.
 
-1. Label the tmux window. Pull out a ticket key (e.g. `PROJ-123`) from the topic if one is there:
+1. Label the tmux window. Pull out an issue/ticket key (e.g. `ABC-123`) from the topic if one is there:
    ```bash
    ~/.claude/skills/my-session/scripts/tmux-label.sh "<bar label>" "<summary>"
    ```
-   - **bar label** (status bar): `<TICKET> <1–3 words>`, e.g. `PROJ-123 agent tuning`. If there's no ticket,
+   - **bar label** (status bar): `<KEY> <1–3 words>`, e.g. `ABC-123 parser rewrite`. If there's no ticket,
      use 1–3 words only. Make it something the user can recognize at a glance, not generic ("work", "session").
    - **summary** (`Ctrl-a w` window list): one plain sentence of 20 words or fewer saying what the session is for.
    - The script caps these at 4 and 20 words, and does nothing outside tmux.
@@ -66,7 +66,7 @@ The command itself is the marker.
    set **Now:** to `Session ended`.
 2. Print the full checklist one last time.
 3. Under it, at most 2 lines on what's still open and who it's waiting on.
-4. Then `Session marked ended.` Take no other actions: no commits, no ticket changes.
+4. Then `Session marked ended.` Take no other actions: no commits, no issue/ticket changes.
 
 ## review
 

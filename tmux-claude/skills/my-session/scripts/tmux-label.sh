@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Label the tmux window running this Claude session.
-# Usage: tmux-label.sh "<bar label: TICKET + 1-3 words>" "<summary sentence, <=20 words>"
+# Usage: tmux-label.sh "<bar label: KEY + 1-3 words>" "<summary sentence, <=20 words>"
 #
 #   bar label -> window name (status bar). Also sets @claude_window_name so
 #                tmux-auto-rename / tmux-rename-window treat it as Claude-owned.

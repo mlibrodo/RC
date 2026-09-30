@@ -18,6 +18,25 @@ import time
 
 ROOT = os.path.expanduser(os.environ.get("MY_SESSION_ROOT", "~/.claude/projects"))
 HOME = os.path.expanduser("~")
+CHECKLISTS = os.path.expanduser(os.environ.get("MY_SESSION_CHECKLISTS", "~/.claude/session-checklists"))
+OWNER_RE = re.compile(r"^\s*[-*] \[ \] \*\*([^*:]+?)(?: \([^)]*\))?:\*\*")
+
+
+def checklist_summary(sid):
+    """'3 open (You 1, Me 2)' from the session's checklist file, or None if it has none."""
+    try:
+        lines = open(os.path.join(CHECKLISTS, f"{sid}.md")).read().splitlines()
+    except OSError:
+        return None
+    open_items = [l for l in lines if re.match(r"^\s*[-*] \[ \]", l)]
+    done = sum(1 for l in lines if re.match(r"^\s*[-*] \[[xX]\]", l))
+    owners = {}
+    for l in open_items:
+        m = OWNER_RE.match(l)
+        who = m.group(1).strip() if m else "?"
+        owners[who] = owners.get(who, 0) + 1
+    by = ", ".join(f"{k} {v}" for k, v in sorted(owners.items(), key=lambda kv: -kv[1]))
+    return f"{len(open_items)} open" + (f" ({by})" if by else "") + f", {done} done"
 CMD_RE = re.compile(r"<command-name>/?([^<]+)</command-name>")
 ARGS_RE = re.compile(r"<command-args>(.*?)</command-args>", re.S)
 BLOCKED_MODELS = ("sonnet", "haiku")
@@ -152,6 +171,7 @@ def main():
         print(f"cwd: {(r['cwd'] or '?').replace(HOME, '~')}   active: {local(r['start'])} -> {local(r['last'])}   "
               f"user_msgs: {len(r['users'])}   model: {r['last_model'] or '?'}")
         print(f"STATUS: {st}   flags: {','.join(flags) or '-'}")
+        print(f"checklist: {checklist_summary(r['sid']) or '-'}")
         print(f"start_topic: {one_line(topic, 200) if topic else '-'}   title: {r['title'] or '-'}")
         print(f"first: {one_line(r['first'], 200)}")
         for u in r["users"][-2:]:

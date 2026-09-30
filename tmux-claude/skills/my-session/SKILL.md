@@ -1,17 +1,18 @@
 ---
 name: my-session
-description: Manual session bookkeeping. `/my-session start <what this session is about>` marks a session's purpose, `/my-session end` marks it finished, `/my-session review [timeframe]` lists previous sessions with their status. Only run when the user types /my-session.
-argument-hint: start <topic> | end | review [timeframe]
+description: Manual session bookkeeping. `/my-session start <what this session is about>` marks a session's purpose and opens its checklist, `/my-session checklist` prints the checklist, `/my-session end` marks it finished and prints the final checklist, `/my-session review [timeframe]` lists previous sessions with their status. Only run when the user types /my-session.
+argument-hint: start <topic> | checklist | end | review [timeframe]
 disable-model-invocation: true
 ---
 
 # /my-session
 
-Arguments: `$ARGUMENTS`. The first word is the subcommand: `start`, `end`, or `review`. Anything else →
-reply with the three usages below and stop.
+Arguments: `$ARGUMENTS`. The first word is the subcommand: `start`, `checklist`, `end`, or `review`.
+Anything else → reply with the four usages below and stop.
 
 ```
 /my-session start <what this session is about>
+/my-session checklist
 /my-session end
 /my-session review [timeframe]     e.g. "2 weeks", "60 days", "2 months" (default 4 weeks)
 ```
@@ -28,9 +29,15 @@ If you're on a blocked model, do nothing else. Reply only:
 
 A start/end typed on a blocked model does not count as a marker. The review script ignores it.
 
+## The checklist
+
+The format and rules live in `~/.claude/interaction.md` (loaded globally from `~/.claude/CLAUDE.md`).
+The file is `~/.claude/session-checklists/<session-id>.md`, where the session ID is the last part of the
+scratchpad path or the transcript filename. `mkdir -p ~/.claude/session-checklists` before the first write.
+
 ## start
 
-The command itself, as recorded in the transcript, is the marker. Nothing needs to be written anywhere.
+The command itself, as recorded in the transcript, is the marker.
 
 1. Label the tmux window. Pull out a ticket key (e.g. `PROJ-123`) from the topic if one is there:
    ```bash
@@ -41,16 +48,25 @@ The command itself, as recorded in the transcript, is the marker. Nothing needs 
    - **summary** (`Ctrl-a w` window list): one plain sentence of 20 words or fewer saying what the session is for.
    - The script caps these at 4 and 20 words, and does nothing outside tmux.
    - If the topic is empty, skip this until the user says what the session is about.
-2. Reply with one line: `Session started — <topic>` plus the pwd.
-3. Then treat the topic as the user's first request and begin the work. If the topic is empty,
+2. Create the checklist file if it doesn't exist yet (a restarted session keeps its old one). Seed it with the
+   topic as **Now:** and any obvious first items, each with an owner.
+3. Reply with one line: `Session started — <topic>` plus the pwd.
+4. Then treat the topic as the user's first request and begin the work. If the topic is empty,
    ask what the session is about.
+
+## checklist
+
+Re-read the checklist file and print it in full. If there is no file yet, build one from the conversation so
+far, write it, then print it. Nothing else.
 
 ## end
 
-The command itself is the marker. Reply with a short recap, 5 bullets at most:
-- what got done (ticket keys, PR/doc links)
-- anything left open or waiting on someone
-Then `Session marked ended.` Take no other actions: no commits, no ticket changes.
+The command itself is the marker.
+1. Bring the checklist file up to date: tick off everything that got done, add anything left open, and
+   set **Now:** to `Session ended`.
+2. Print the full checklist one last time.
+3. Under it, at most 2 lines on what's still open and who it's waiting on.
+4. Then `Session marked ended.` Take no other actions: no commits, no ticket changes.
 
 ## review
 
@@ -70,11 +86,12 @@ Then `Session marked ended.` Take no other actions: no commits, no ticket change
    | NOT_ENDED | ⚠️ Not ended |
 4. Output one table, most recently active first:
 
-   | # | Last active | Session ID (full) | pwd | Topic | Status |
+   | # | Last active | Session ID (full) | pwd | Topic | Open items | Status |
 
    - Topic = `start_topic` if present. Otherwise write a short summary from `first` and the last messages,
      including ticket keys and PR numbers.
    - pwd uses `~`.
+   - Open items = the script's `checklist:` line (e.g. `3 open (You 1, Me 2)`), or `-` if there is none.
 5. Above the table, put the resume command: `cd <pwd> && claude --resume <session-id>`.
    Below the table, name the ⚠️ sessions flagged `ACTIVE_<36H_BEFORE_BOOT` or `INTERRUPTED` as the ones a
    reboot or crash likely cut off.

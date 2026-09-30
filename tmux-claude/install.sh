@@ -3,6 +3,7 @@
 #   - symlinks bin/* into ~/.local/bin
 #   - symlinks skills/* into ~/.claude/skills
 #   - adds the hooks to ~/.claude/settings.json (skips any already present)
+#   - symlinks claude/interaction.md to ~/.claude/interaction.md and imports it from ~/.claude/CLAUDE.md
 #   - makes ~/.tmux.conf.local source tmux-claude.conf
 set -euo pipefail
 
@@ -32,6 +33,20 @@ for d in "$SCRIPT_DIR"/skills/*/; do
     ln -sfn "${d%/}" "$dst"
     echo "  link  $dst"
 done
+
+# --- Global interaction rules (❓ asks + session checklist) ---
+ln -sfn "$SCRIPT_DIR/claude/interaction.md" ~/.claude/interaction.md
+echo "  link  ~/.claude/interaction.md"
+mkdir -p ~/.claude/session-checklists
+CLAUDE_MD=~/.claude/CLAUDE.md
+IMPORT="@~/.claude/interaction.md"
+touch "$CLAUDE_MD"
+if grep -qxF "$IMPORT" "$CLAUDE_MD"; then
+    echo "  md    $CLAUDE_MD already imports interaction.md"
+else
+    printf '\n## How we work together\n\n%s\n' "$IMPORT" >> "$CLAUDE_MD"
+    echo "  md    added $IMPORT to $CLAUDE_MD"
+fi
 
 # --- Hooks in ~/.claude/settings.json ---
 SETTINGS="$HOME/.claude/settings.json"

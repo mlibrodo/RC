@@ -9,7 +9,8 @@ here, so the main `.tmux.conf` stays plain tmux.
 |---|---|
 | Window auto-rename | On your first message, a window still named `bash`/`zsh`/an IP is renamed to the git repo (or directory) name. Windows you renamed yourself are left alone. |
 | `!!!` marker | A red `!!!` appears on any non-active window whose Claude session is waiting on you, and clears when you reply. |
-| `/my-session` skill | `/my-session start <topic>` labels the window and sets a one-line summary; `end` marks it done; `review [timeframe]` lists past sessions and their status. |
+| `/my-session` skill | `/my-session start <topic>` labels the window, sets a one-line summary and opens the session checklist; `checklist` prints it; `end` marks the session done and prints the final checklist; `review [timeframe]` lists past sessions with status and open-item counts. |
+| Interaction rules | `claude/interaction.md`, imported globally from `~/.claude/CLAUDE.md`: every ask for you starts with ❓ and comes last in the reply; every session keeps an owner-tagged (You / Me / others) checklist in `~/.claude/session-checklists/<session-id>.md`, ticked off as work gets done. |
 | Session summaries in the window list | `Ctrl-a w` / `Ctrl-a "` show each window's `/my-session` summary next to its name. |
 
 ## Files
@@ -19,6 +20,8 @@ bin/
   tmux-auto-rename     UserPromptSubmit hook: renames default-named windows
   tmux-rename-window   renames the window unless you renamed it by hand (@claude_window_name)
   tmux-needs-answer    Stop/Notification hook sets @needs_answer, UserPromptSubmit clears it
+claude/
+  interaction.md       global rules: ❓ asks + session checklist (symlinked to ~/.claude/interaction.md)
 skills/
   my-session/          the /my-session skill (SKILL.md + scripts)
 tmux-claude.conf       tmux bindings/formats that read @session_summary and @needs_answer

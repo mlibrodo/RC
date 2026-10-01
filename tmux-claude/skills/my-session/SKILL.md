@@ -62,11 +62,22 @@ far, write it, then print it. Nothing else.
 ## end
 
 The command itself is the marker.
-1. Bring the checklist file up to date: tick off everything that got done, add anything left open, and
-   set **Now:** to `Session ended`.
-2. Print the full checklist one last time.
-3. Under it, at most 2 lines on what's still open and who it's waiting on.
-4. Then `Session marked ended.` Take no other actions: no commits, no issue/ticket changes.
+1. Bring the checklist file up to date: tick off everything that got done and add anything left open.
+2. **Triage what's still open, before ending.** If any `[ ]` items remain, ask about them with
+   `AskUserQuestion`. Don't use plain text: the answers come back as tool results, so the review script
+   still sees the session as ended.
+   - With 4 or fewer open items, ask one question per item (header = owner, question = the item). Options:
+     - **Carry over:** leave it `[ ]`. It shows in `/my-session review` as an open item.
+     - **Drop:** change it to `- [-] … (dropped)`.
+     - **Already done:** tick it `[x]`.
+     - **Do it now:** don't end. Say `Not ended — finish the work, then run /my-session end again.` and stop.
+   - With more than 4, ask one question per owner (You / Me / each other person), multiSelect over that
+     owner's items, "Which of these should carry over? Unselected ones get dropped." If you can't tell
+     what to do with something, add one more question for it.
+   - If the user dismisses the questions, treat everything as carried over.
+3. Set **Now:** to `Session ended`, write the file, and print the full checklist one last time.
+4. Under it, at most 2 lines on what's carried over and who it's waiting on.
+5. Then `Session marked ended.` Take no other actions: no commits, no issue/ticket changes.
 
 ## review
 

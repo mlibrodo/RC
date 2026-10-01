@@ -44,13 +44,15 @@ Rules:
   "Cutover day", "After release", "Wrap-up", "Testing". A small session can have a single "To do" heading.
 - **Tick items off in place** (`[ ]` → `[x]`) as soon as they're done. Don't delete them.
   "Done this session" is for finished work that was never a planned item.
+- Dropped items become `- [-] … (dropped)` and stay in the list.
 - Add new items the moment they come up: follow-ups, things waiting on other people, deferred ideas.
 - Include issue/ticket keys, PR numbers, and full raw URLs (never markdown link syntax).
 - A table is fine for a test matrix or anything with several columns (#, case, who, status).
 - End with a one-line **Blocking:** summary when something is waiting on someone. Omit it when nothing is.
 - Keep items short, one line each.
 
-**When to print it:** only when I ask (`/my-session checklist`) and one last time at `/my-session end`.
+**When to print it:** only when I ask (`/my-session checklist`) and one last time at `/my-session end`
+(which first asks me what to do with every unchecked item).
 Otherwise keep the file up to date silently and don't print it in replies.
 
 **Reply order:** answer/work → ❓ asks (if any).

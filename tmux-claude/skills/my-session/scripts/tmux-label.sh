@@ -3,7 +3,7 @@
 # Usage: tmux-label.sh "<bar label: KEY + 1-3 words>" "<summary sentence, <=20 words>" [session-id]
 #
 #   With a session-id, the labels are also saved to ~/.claude/session-labels/<session-id>
-#   (line 1 = bar, line 2 = summary) so tmux-session-relabel can restore them on resume.
+#   (line 1 = bar, line 2 = summary) so /my-session restart can restore them on resume.
 #
 #   bar label -> window name (status bar). Also sets @claude_window_name so
 #                tmux-auto-rename / tmux-rename-window treat it as Claude-owned.

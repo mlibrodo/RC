@@ -44,8 +44,8 @@ The command itself, as recorded in the transcript, is the marker.
    ```bash
    ~/.claude/skills/my-session/scripts/tmux-label.sh "<bar label>" "<summary>" <session-id>
    ```
-   - Passing the session ID saves the labels to `~/.claude/session-labels/<session-id>`, so the
-     `tmux-session-relabel` SessionStart hook can put them back automatically when the session is resumed.
+   - Passing the session ID saves the labels to `~/.claude/session-labels/<session-id>`, so
+     `/my-session restart` can put them back after the session is resumed.
    - **bar label** (status bar): `<KEY> <1–3 words>`, e.g. `ABC-123 parser rewrite`. If there's no ticket,
      use 1–3 words only. Make it something the user can recognize at a glance, not generic ("work", "session").
    - **summary** (`Ctrl-a w` window list): one plain sentence of 20 words or fewer saying what the session is for.
@@ -60,7 +60,7 @@ The command itself, as recorded in the transcript, is the marker.
 ## restart
 
 Not a marker. It doesn't change the session's start/end status. Use it after resuming a session whose tmux
-window lost its labels (reboot, new tmux server). The SessionStart hook usually does this automatically.
+window lost its labels (reboot, new tmux server). It only runs when the user types it. There is no hook.
 1. If `~/.claude/session-labels/<session-id>` exists, re-apply it:
    `~/.claude/skills/my-session/scripts/tmux-label.sh "$(sed -n 1p <file>)" "$(sed -n 2p <file>)"`
 2. Otherwise build the labels from the most recent `/my-session start` topic in this conversation, with the

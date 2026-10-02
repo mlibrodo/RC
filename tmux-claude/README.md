@@ -9,8 +9,9 @@ here, so the main `.tmux.conf` stays plain tmux.
 |---|---|
 | Window auto-rename | On your first message, a window still named `bash`/`zsh`/an IP is renamed to the git repo (or directory) name. Windows you renamed yourself are left alone. |
 | `!!!` marker | A red `!!!` appears on any non-active window whose Claude session is waiting on you, and clears when you reply. |
-| `/my-session` skill | `/my-session start <topic>` labels the window, sets a one-line summary and opens the session checklist; `checklist` prints it; `end` asks what to do with each unchecked item (carry over, drop, done, or keep working), then marks the session done and prints the final checklist; `review [timeframe]` lists past sessions with status and open-item counts. |
+| `/my-session` skill | `/my-session start <topic>` labels the window, sets a one-line summary (both saved per session) and opens the session checklist; `restart` puts the labels back after a resume; `checklist` prints it; `end` asks what to do with each unchecked item (carry over, drop, done, or keep working), then marks the session done and prints the final checklist; `review [timeframe]` lists past sessions with status and open-item counts. |
 | Interaction rules | `claude/interaction.md`, imported globally from `~/.claude/CLAUDE.md`: every ask for you starts with ❓ and comes last in the reply; every session keeps an owner-tagged (You / Me / others) checklist in `~/.claude/session-checklists/<session-id>.md`, ticked off as work gets done. |
+| Labels survive a reboot | A SessionStart hook (`tmux-session-relabel`) puts a resumed session's saved window label and summary back. If nothing was saved, it suggests `/my-session restart`. |
 | Session summaries in the window list | `Ctrl-a w` / `Ctrl-a "` show each window's `/my-session` summary next to its name. |
 
 ## Files
@@ -20,6 +21,7 @@ bin/
   tmux-auto-rename     UserPromptSubmit hook: renames default-named windows
   tmux-rename-window   renames the window unless you renamed it by hand (@claude_window_name)
   tmux-needs-answer    Stop/Notification hook sets @needs_answer, UserPromptSubmit clears it
+  tmux-session-relabel SessionStart hook: on resume, restores the label saved in ~/.claude/session-labels/
 claude/
   interaction.md       global rules: ❓ asks + session checklist (symlinked to ~/.claude/interaction.md)
 skills/

@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# Claude Code SessionStart hook. On resume (e.g. after a reboot), puts back the tmux window
+# label and summary that /my-session start saved in ~/.claude/session-labels/<session-id>.
+# If the session has a /my-session start but no saved label (started before labels were
+# saved), it suggests /my-session restart instead. No-op outside tmux or for other sources.
+
+[ -n "${TMUX_PANE:-}" ] || exit 0
+command -v jq >/dev/null || exit 0
+
+input=$(cat)
+[ "$(jq -r '.source // empty' <<<"$input")" = "resume" ] || exit 0
+sid=$(jq -r '.session_id // empty' <<<"$input")
+[ -n "$sid" ] || exit 0
+
+file=~/.claude/session-labels/$sid
+if [ -f "$file" ]; then
+    bar=$(sed -n 1p "$file")
+    summary=$(sed -n 2p "$file")
+    ~/.claude/skills/my-session/scripts/tmux-label.sh "$bar" "$summary" >/dev/null
+    jq -nc --arg m "tmux label restored: $bar" '{systemMessage: $m}'
+    exit 0
+fi
+
+transcript=$(jq -r '.transcript_path // empty' <<<"$input")
+if [ -f "$transcript" ] && grep -q '<command-args>start ' "$transcript"; then
+    jq -nc '{systemMessage: "No saved tmux label for this session. Run /my-session restart to restore it."}'
+fi

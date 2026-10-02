@@ -52,16 +52,17 @@ fi
 SETTINGS="$HOME/.claude/settings.json"
 [ -f "$SETTINGS" ] || echo '{}' > "$SETTINGS"
 
-add_hook() {  # add_hook <event> <command>
-    local event="$1" cmd="$2" tmp
+add_hook() {  # add_hook <event> <command> [sync]  (async unless "sync": sync hooks can show a message)
+    local event="$1" cmd="$2" async=true tmp
+    [ "${3:-}" = sync ] && async=false
     if jq -e --arg e "$event" --arg c "$cmd" \
         '[.hooks[$e][]?.hooks[]?.command] | index($c)' "$SETTINGS" >/dev/null; then
         echo "  hook  $event: $cmd (already present)"
         return
     fi
     tmp=$(mktemp)
-    jq --arg e "$event" --arg c "$cmd" \
-        '.hooks[$e] = ((.hooks[$e] // []) + [{"hooks": [{"type": "command", "command": $c, "async": true}]}])' \
+    jq --arg e "$event" --arg c "$cmd" --argjson a "$async" \
+        '.hooks[$e] = ((.hooks[$e] // []) + [{"hooks": [{"type": "command", "command": $c, "async": $a}]}])' \
         "$SETTINGS" > "$tmp" && mv "$tmp" "$SETTINGS"
     echo "  hook  $event: $cmd (added)"
 }
@@ -69,6 +70,7 @@ add_hook UserPromptSubmit "~/.local/bin/tmux-auto-rename"
 add_hook UserPromptSubmit "~/.local/bin/tmux-needs-answer clear"
 add_hook Stop             "~/.local/bin/tmux-needs-answer set"
 add_hook Notification     "~/.local/bin/tmux-needs-answer set"
+add_hook SessionStart     "~/.local/bin/tmux-session-relabel" sync
 
 # --- tmux config ---
 LOCAL=~/.tmux.conf.local

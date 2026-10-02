@@ -1,17 +1,18 @@
 ---
 name: my-session
-description: Manual session bookkeeping. `/my-session start <what this session is about>` marks a session's purpose and opens its checklist, `/my-session checklist` prints the checklist, `/my-session end` marks it finished and prints the final checklist, `/my-session review [timeframe]` lists previous sessions with their status. Only run when the user types /my-session.
-argument-hint: start <topic> | checklist | end | review [timeframe]
+description: Manual session bookkeeping. `/my-session start <what this session is about>` marks a session's purpose and opens its checklist, `/my-session restart` restores the tmux labels after a resume, `/my-session checklist` prints the checklist, `/my-session end` marks it finished and prints the final checklist, `/my-session review [timeframe]` lists previous sessions with their status. Only run when the user types /my-session.
+argument-hint: start <topic> | restart | checklist | end | review [timeframe]
 disable-model-invocation: true
 ---
 
 # /my-session
 
-Arguments: `$ARGUMENTS`. The first word is the subcommand: `start`, `checklist`, `end`, or `review`.
-Anything else → reply with the four usages below and stop.
+Arguments: `$ARGUMENTS`. The first word is the subcommand: `start`, `restart`, `checklist`, `end`, or `review`.
+Anything else → reply with the five usages below and stop.
 
 ```
 /my-session start <what this session is about>
+/my-session restart                  (after resuming, e.g. post-reboot: put the tmux labels back)
 /my-session checklist
 /my-session end
 /my-session review [timeframe]     e.g. "2 weeks", "60 days", "2 months" (default 4 weeks)
@@ -41,8 +42,10 @@ The command itself, as recorded in the transcript, is the marker.
 
 1. Label the tmux window. Pull out an issue/ticket key (e.g. `ABC-123`) from the topic if one is there:
    ```bash
-   ~/.claude/skills/my-session/scripts/tmux-label.sh "<bar label>" "<summary>"
+   ~/.claude/skills/my-session/scripts/tmux-label.sh "<bar label>" "<summary>" <session-id>
    ```
+   - Passing the session ID saves the labels to `~/.claude/session-labels/<session-id>`, so the
+     `tmux-session-relabel` SessionStart hook can put them back automatically when the session is resumed.
    - **bar label** (status bar): `<KEY> <1–3 words>`, e.g. `ABC-123 parser rewrite`. If there's no ticket,
      use 1–3 words only. Make it something the user can recognize at a glance, not generic ("work", "session").
    - **summary** (`Ctrl-a w` window list): one plain sentence of 20 words or fewer saying what the session is for.
@@ -53,6 +56,18 @@ The command itself, as recorded in the transcript, is the marker.
 3. Reply with one line: `Session started — <topic>` plus the pwd.
 4. Then treat the topic as the user's first request and begin the work. If the topic is empty,
    ask what the session is about.
+
+## restart
+
+Not a marker. It doesn't change the session's start/end status. Use it after resuming a session whose tmux
+window lost its labels (reboot, new tmux server). The SessionStart hook usually does this automatically.
+1. If `~/.claude/session-labels/<session-id>` exists, re-apply it:
+   `~/.claude/skills/my-session/scripts/tmux-label.sh "$(sed -n 1p <file>)" "$(sed -n 2p <file>)"`
+2. Otherwise build the labels from the most recent `/my-session start` topic in this conversation, with the
+   same rules as `start` step 1, and run `tmux-label.sh` with the session ID so they're saved for next time.
+   If there was never a `start`, ask what the session is about, then label it the same way.
+3. Reply with one line: `Session resumed — <topic>` plus the pwd, and the open-item count from the
+   checklist file (e.g. `3 open (You 1, Me 2)`). Don't print the checklist.
 
 ## checklist
 

@@ -59,15 +59,18 @@ The command itself, as recorded in the transcript, is the marker.
 
 ## restart
 
-Not a marker. It doesn't change the session's start/end status. Use it after resuming a session whose tmux
-window lost its labels (reboot, new tmux server). It only runs when the user types it. There is no hook.
+Use it after resuming a session (reboot, new tmux server). It only runs when the user types it. There is no hook.
+The command is a marker. If the session had been ended, a `restart` after that `end` makes it live again
+(`review` shows ↩️ Reopened after end) until the next `/my-session end`.
 1. If `~/.claude/session-labels/<session-id>` exists, re-apply it:
    `~/.claude/skills/my-session/scripts/tmux-label.sh "$(sed -n 1p <file>)" "$(sed -n 2p <file>)"`
 2. Otherwise build the labels from the most recent `/my-session start` topic in this conversation, with the
    same rules as `start` step 1, and run `tmux-label.sh` with the session ID so they're saved for next time.
    If there was never a `start`, ask what the session is about, then label it the same way.
-3. Reply with one line: `Session resumed — <topic>` plus the pwd, and the open-item count from the
-   checklist file (e.g. `3 open (You 1, Me 2)`). Don't print the checklist.
+3. If the checklist's **Now:** says `Session ended`, change it to `Resumed — <topic>` (or the next open item).
+4. Reply with one line: `Session resumed — <topic>` plus the pwd, and the open-item count from the
+   checklist file (e.g. `3 open (You 1, Me 2)`). If the session had been ended, add `(reopened)`.
+   Don't print the checklist.
 
 ## checklist
 

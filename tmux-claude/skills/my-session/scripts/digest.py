@@ -3,7 +3,8 @@
 
 Usage: digest.py [--days N] [--exclude SESSION_ID_PREFIX]
 
-Status comes only from explicit `/my-session start|end` markers in each transcript.
+Status comes only from explicit `/my-session start|end|restart` markers in each transcript.
+A `restart` after the last `end` reopens the session (REOPENED_AFTER_END).
 A marker counts only if the assistant reply right after it came from an allowed model
 (anything but Sonnet/Haiku, i.e. Opus or Fable).
 """
@@ -128,7 +129,8 @@ def status(s):
     topic = starts[-1]["args"] if starts else None
     if not ends:
         return "NOT_ENDED", topic
-    if len(s["users"]) > ends[-1]["users_before"]:
+    last_end = max(i for i, m in enumerate(valid) if m["sub"] == "end")
+    if len(s["users"]) > ends[-1]["users_before"] or any(m["sub"] == "restart" for m in valid[last_end + 1:]):
         return "REOPENED_AFTER_END", topic
     return "ENDED", topic
 

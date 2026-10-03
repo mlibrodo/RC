@@ -1,13 +1,13 @@
 ---
 name: my-session
-description: Manual session bookkeeping. `/my-session start <what this session is about>` marks a session's purpose and opens its checklist, `/my-session restart` restores the tmux labels after a resume, `/my-session checklist` prints the checklist, `/my-session end` marks it finished and prints the final checklist, `/my-session review [timeframe]` lists previous sessions with their status. Only run when the user types /my-session.
-argument-hint: start <topic> | restart | checklist | end | review [timeframe]
+description: Manual session bookkeeping. `/my-session start <what this session is about>` marks a session's purpose and opens its checklist, `/my-session restart` restores the tmux labels after a resume, `/my-session checklist` prints the checklist, `/my-session end` marks it finished and prints the final checklist, `/my-session review [timeframe]` lists previous sessions with their status, `/my-session close <session-id> …` closes other sessions from here. Only run when the user types /my-session.
+argument-hint: start <topic> | restart | checklist | end | review [timeframe] | close <session-id> …
 disable-model-invocation: true
 ---
 
 # /my-session
 
-Arguments: `$ARGUMENTS`. The first word is the subcommand: `start`, `restart`, `checklist`, `end`, or `review`.
+Arguments: `$ARGUMENTS`. The first word is the subcommand: `start`, `restart`, `checklist`, `end`, `review`, or `close`.
 Anything else → reply with the five usages below and stop.
 
 ```
@@ -16,6 +16,7 @@ Anything else → reply with the five usages below and stop.
 /my-session checklist
 /my-session end
 /my-session review [timeframe]     e.g. "2 weeks", "60 days", "2 months" (default 4 weeks)
+/my-session close <session-id> …   (close other sessions without opening them, e.g. from a review)
 ```
 
 ## Model gate (every subcommand)
@@ -111,6 +112,7 @@ The command itself is the marker.
    | STATUS | Show |
    |---|---|
    | ENDED | ✅ Ended |
+   | CLOSED | ✅ Closed |
    | REOPENED_AFTER_END | ↩️ Reopened after end |
    | NOT_ENDED | ⚠️ Not ended |
 4. Output one table, most recently active first:
@@ -124,3 +126,16 @@ The command itself is the marker.
 5. Above the table, put the resume command: `cd <pwd> && claude --resume <session-id>`.
    Below the table, name the ⚠️ sessions flagged `ACTIVE_<36H_BEFORE_BOOT` or `INTERRUPTED` as the ones a
    reboot or crash likely cut off.
+
+## close
+
+Closes other sessions without resuming them. Use it for sessions listed in a review that are finished.
+No checklist triage, and their checklists are left unchanged.
+1. Take every full session ID in the arguments (ignore stray characters like `│`). Each must match a
+   transcript `~/.claude/projects/*/<id>.jsonl`. Report any that don't, and skip them.
+2. `mkdir -p ~/.claude/session-closed`, then write the current local ISO timestamp to
+   `~/.claude/session-closed/<id>` for each:
+   `python3 -c 'import datetime;print(datetime.datetime.now().astimezone().isoformat())' > ~/.claude/session-closed/<id>`
+3. `digest.py` shows them as `CLOSED`. If one is used again after that time it shows `REOPENED_AFTER_END`.
+   To undo a close, delete its file.
+4. Reply with how many were closed, plus any IDs that were skipped.

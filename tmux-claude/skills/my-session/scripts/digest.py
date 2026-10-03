@@ -7,6 +7,8 @@ Status comes only from explicit `/my-session start|end|restart` markers in each 
 A `restart` after the last `end` reopens the session (REOPENED_AFTER_END).
 A marker counts only if the assistant reply right after it came from an allowed model
 (anything but Sonnet/Haiku, i.e. Opus or Fable).
+`/my-session close <ids>` writes ~/.claude/session-closed/<sid> (an ISO timestamp). A session with no
+activity after that time is CLOSED; activity after it reopens the session (REOPENED_AFTER_END).
 """
 import argparse
 import datetime as dt
@@ -20,6 +22,7 @@ import time
 ROOT = os.path.expanduser(os.environ.get("MY_SESSION_ROOT", "~/.claude/projects"))
 HOME = os.path.expanduser("~")
 CHECKLISTS = os.path.expanduser(os.environ.get("MY_SESSION_CHECKLISTS", "~/.claude/session-checklists"))
+CLOSED = os.path.expanduser(os.environ.get("MY_SESSION_CLOSED", "~/.claude/session-closed"))
 OWNER_RE = re.compile(r"^\s*[-*] \[ \] \*\*([^*:]+?)(?: \([^)]*\))?:\*\*")
 
 
@@ -122,11 +125,22 @@ def digest(path):
     return s
 
 
+def closed_at(sid):
+    """Epoch the session was closed from another session via `/my-session close`, or None."""
+    try:
+        return dt.datetime.fromisoformat(open(os.path.join(CLOSED, sid)).read().strip()).timestamp()
+    except (OSError, ValueError):
+        return None
+
+
 def status(s):
     valid = [m for m in s["markers"] if m["model"] and not any(b in m["model"].lower() for b in BLOCKED_MODELS)]
     starts = [m for m in valid if m["sub"] == "start"]
     ends = [m for m in valid if m["sub"] == "end"]
     topic = starts[-1]["args"] if starts else None
+    closed = closed_at(s["sid"])
+    if closed is not None:
+        return ("CLOSED" if epoch(s["last"]) <= closed else "REOPENED_AFTER_END"), topic
     if not ends:
         return "NOT_ENDED", topic
     last_end = max(i for i, m in enumerate(valid) if m["sub"] == "end")
@@ -165,7 +179,7 @@ def main():
     for r in rows:
         st, topic = status(r)
         flags = []
-        if boot and 0 <= boot - epoch(r["last"]) < 36 * 3600 and st != "ENDED":
+        if boot and 0 <= boot - epoch(r["last"]) < 36 * 3600 and st not in ("ENDED", "CLOSED"):
             flags.append("ACTIVE_<36H_BEFORE_BOOT")
         if r["last_asst"].startswith("API Error") or not r["last_asst"]:
             flags.append("INTERRUPTED")

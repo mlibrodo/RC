@@ -1,14 +1,14 @@
 ---
 name: my-session
-description: Manual session bookkeeping. `/my-session start <what this session is about>` marks a session's purpose and opens its checklist, `/my-session restart` restores the tmux labels after a resume, `/my-session checklist` prints the checklist, `/my-session end` marks it finished and prints the final checklist, `/my-session review [timeframe]` lists previous sessions with their status, `/my-session close <session-id> …` closes other sessions from here. Only run when the user types /my-session.
-argument-hint: start <topic> | restart | checklist | end | review [timeframe] | close <session-id> …
+description: Manual session bookkeeping. `/my-session start <what this session is about>` marks a session's purpose and opens its checklist, `/my-session restart` restores the tmux labels after a resume, `/my-session checklist` prints the checklist, `/my-session end` marks it finished and prints the final checklist, `/my-session review [timeframe]` lists previous sessions with their status, `/my-session close <session-id> …` closes other sessions from here, `/my-session tmux-reorder [session]` groups the tmux windows by topic and reorders them after a guided review. Only run when the user types /my-session.
+argument-hint: start <topic> | restart | checklist | end | review [timeframe] | close <session-id> … | tmux-reorder [session]
 disable-model-invocation: true
 ---
 
 # /my-session
 
-Arguments: `$ARGUMENTS`. The first word is the subcommand: `start`, `restart`, `checklist`, `end`, `review`, or `close`.
-Anything else → reply with the five usages below and stop.
+Arguments: `$ARGUMENTS`. The first word is the subcommand: `start`, `restart`, `checklist`, `end`, `review`, `close`, or `tmux-reorder`.
+Anything else → reply with the usages below and stop.
 
 ```
 /my-session start <what this session is about>
@@ -17,6 +17,7 @@ Anything else → reply with the five usages below and stop.
 /my-session end
 /my-session review [timeframe]     e.g. "2 weeks", "60 days", "2 months" (default 4 weeks)
 /my-session close <session-id> …   (close other sessions without opening them, e.g. from a review)
+/my-session tmux-reorder [session] (group the tmux windows by topic, review, then reorder)
 ```
 
 ## Model gate (every subcommand)
@@ -139,3 +140,43 @@ No checklist triage, and their checklists are left unchanged.
 3. `digest.py` shows them as `CLOSED`. If one is used again after that time it shows `REOPENED_AFTER_END`.
    To undo a close, delete its file.
 4. Reply with how many were closed, plus any IDs that were skipped.
+
+## tmux-reorder
+
+Groups the windows of a tmux session by topic, walks the user through changes, then reorders them.
+It is not a marker and doesn't touch the checklist. The optional argument is the tmux session name
+(default: the session this Claude runs in).
+
+1. List the windows:
+   ```bash
+   ~/.claude/skills/my-session/scripts/tmux-windows.sh list [session]
+   ```
+   Columns (tab-separated): index, window id, name, `/my-session` summary, running command, path, active.
+   Not in tmux → say so and stop.
+2. If `~/.claude/tmux-topics.md` exists, read it. It holds topic names the user picked before, in their
+   preferred order, each with an optional hint (`- <Topic>: <hint>`). Reuse those topics where windows fit them.
+3. Propose the grouping. Infer topics from the window name first, then the summary, then the path
+   (same repo or project folder), then the command. Rules:
+   - Windows sharing an issue key prefix or a project word belong together; related keys
+     (e.g. `ABC-12` and `ABC-40` both about "parser") go in the same topic.
+   - Topics of 2+ windows; a lone window goes into **Other** unless it matches a saved topic.
+   - Order: windows that don't belong to any topic but should stay first (a window lister, a dashboard,
+     whatever is at index 1 now) stay first; then topics in saved order, then new topics by size
+     (largest first); **Other** last. Within a topic keep the current relative order.
+   Show the proposal as a code block: new number, topic headings (`── Topic`), window names.
+4. Guided review, with `AskUserQuestion` (put the proposal in each option's `preview` so it stays on screen):
+   - **Apply as shown** (Recommended)
+   - **Rename or merge topics:** ask which, then redo the proposal.
+   - **Move windows:** ask which windows go where (the user types it in "Other"), then redo the proposal.
+   - **Change topic order:** ask for the order, then redo the proposal.
+   Loop until the user picks Apply, or stops (dismissed → change nothing and say so).
+5. Apply, passing window **ids** (not indexes, which shift) in the final order:
+   ```bash
+   ~/.claude/skills/my-session/scripts/tmux-windows.sh apply [session] @3 @7 @1 …
+   ```
+   It swaps windows into the session's existing index slots, so nothing restarts and the user stays on
+   their current window. Windows opened since the listing are kept, after the listed ones.
+6. Save the final topic names (in order, with a short hint each) to `~/.claude/tmux-topics.md`, keeping
+   saved topics that had no windows this time at the end, so the next run reuses them.
+7. Reply with the new order (number + name per line, under topic headings). Mention that tmux doesn't keep the
+   order after the tmux server restarts.
